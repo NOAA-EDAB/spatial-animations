@@ -2,7 +2,7 @@
 % clf
 %% Loading Data
 % load ('C:\Users\kristin.kleisner.NMFS\Desktop\mappingCode\RawData\NEBathymetry.txt');
-load ('C:\Users\joseph.caracappa\Documents\Website Visualizations\NEBathymetry.txt');
+load ('C:\Users\joseph.caracappa\Documents\GitHub\spatial-animations\NEBathymetry.txt');
 lonb=NEBathymetry(:,1); latb=NEBathymetry(:,2);depth=NEBathymetry(:,3);
 
 [CR, STA, STR, VES, YEAR, SEASON, TOW, SHG, GEAR, ESTYR, MON, DAT, TIME, DISTB, DISTW, AVGDPT, AREA, BTEMP,  LAT, LONG]=...
@@ -13,7 +13,7 @@ Hour=floor(TIME/100);
 LATDD=floor(LAT./100)+((LAT./100)-floor(LAT./100))./60.*100; LONDD=(floor(LONG./100)+((LONG./100)-floor(LONG./100))./60.*100).*-1;
 
 % catchviewName = ['C:\Users\kristin.kleisner.NMFS\Desktop\mappingCode\Raw_input_SP_FA\Fall2\catchview_', num2str(SVSPP(ss)),'.csv'];
-catchviewName = ['C:\Users\joseph.caracappa\Documents\Website Visualizations\catchview_', num2str(SVSPP(ss)),'.csv'];
+catchviewName = ['C:\Users\joseph.caracappa\Documents\GitHub\spatial-animations\catchview_', num2str(SVSPP(ss)),'.csv'];
 [catCR, catSTR, catTOW, catSTA, catSEA, catSPP, catCOM, catSEX, catWGT, catN]=...
         textread(catchviewName,'%f %f %f %f %s %f %s %f %f %f','delimiter',',', 'headerlines', 1, 'endofline', '\r');
 
@@ -26,9 +26,8 @@ catchviewName = ['C:\Users\joseph.caracappa\Documents\Website Visualizations\cat
 
 
 %% Picking Data
-MaxLat=45;     MinLat=35;                                   %%%Change_____________________________
-MaxLon=-65;  MinLon=-76;                                  %%%Change_____________________________
-Interval=.02;  Radius=2.5;                                   %%%Change_____________________________
+
+Radius=2.5;                                   %%%Change_____________________________
 MinLength=0;
 
 k=find(YEAR>=Yr-2 & YEAR<=Yr+2  & strcmp(SEASON,'FALL')==1);
@@ -50,7 +49,7 @@ end
 
 %% Gridding Bathymetry
 LatDepConv=.1  %(.001---> 10 m change is .01 degree distance; .002 --10 m change is .02 degree)
-[xi yi]=meshgrid(MinLon:Interval:MaxLon,MinLat:Interval:MaxLat);
+
 depthgrid=griddata(lonb,latb,depth,xi,yi,'cubic');
 [r c]=size(xi);
 
@@ -84,16 +83,16 @@ end
 
 
 % TrawlStrata=shaperead('C:\Users\kristin.kleisner.NMFS\Desktop\mappingCode\RawData\strata.shp');
-TrawlStrata=shaperead('C:\Users\joseph.caracappa\Documents\Website Visualizations\Shapefiles\strata\strata.shp');
-iSampled=-1*ones(r,c)
-for n=1:310
-    n
-    k=find(STR==TrawlStrata(n).STRATA);
-    if length(k)>=1
-        k3=find(inpolygon(xi,yi,TrawlStrata(n).X,TrawlStrata(n).Y));
-        iSampled(k3)=1;
-    end
-end
+% TrawlStrata=shaperead('C:\Users\joseph.caracappa\Documents\Website Visualizations\Shapefiles\strata\strata.shp');
+iSampled=-1*ones(r,c);
+% for n=1:310
+%     n
+%     k=find(STR==TrawlStrata(n).STRATA);
+%     if length(k)>=1
+%         k3=find(inpolygon(xi,yi,TrawlStrata(n).X,TrawlStrata(n).Y));
+%         iSampled(k3)=1;
+%     end
+% end
 k=find(iSampled<0);
 zi2=zi;
 zi2(k)=nan;
@@ -105,52 +104,52 @@ zi2(k)=nan;
 
 k=find(zi2<0.00);
 zi2(k)=nan;
-pcolor(xi,yi,(zi2));
-shading interp
-axis equal
-hold on
-
-
-
- box on
- xlim([-76 -65])
-ylim([35 45])
-v=[-150 -50]
-contour(xi,yi,depthgrid,v,'Color',[.8 .8 .8])
-
-[Hist, Idx] = hist(zi2(:), 1000);
-%cumHist = cumsum(Hist)/sum(Hist);
-%Idx_max = find(cumHist > 0.999,1);
-bin_max = Idx(end);
-
-set(gca,'clim',[0 bin_max])
-
-
-states = shaperead('usastatehi', 'UseGeoCoords', true);
-geoshow(states, 'DefaultFaceColor', 'black', ...
-                'DefaultEdgeColor', 'black');
-hold on
-% CL=shaperead('C:\Users\kristin.kleisner.NMFS\Desktop\mappingCode\RawData\Province.shp')
-CL=shaperead('C:\Users\joseph.caracappa\Documents\Website Visualizations\Shapefiles\PROVINCE\Province.shp')
-mapshow(CL,'FaceColor', 'black', ...
-                'DefaultEdgeColor', 'black');
-            
-geoshow(states, 'FaceColor', 'black');
-set(gca,'xtick',[-74 -72 -70 -68 -66])
-set(gca,'xTickLabel',{'74 W';'72 W';'70 W';'68 W';'66 W'},'FontSize',10);
-set(gca,'Ytick',[ 36 38 40 42 44])
-set(gca,'YTickLabel',{'36 N';'38 N';'40 N';'42 N';'44 N'},'FontSize',10);
-
-% set uniform color scheme for all the years based on first year range of
-% values
-if sum(CATCH(:)) > 0
-if ~exist('cmax', 'var')
-cmax = max(zi2(:));
-end
-caxis([0, cmax])
-colorbar;
-hcb=colorbar;
-colorTitleHandle = get(hcb,'Title');
-titleString = 'Numbers/Tow';
-set(colorTitleHandle ,'String',titleString);
-end
+% pcolor(xi,yi,(zi2));
+% shading interp
+% axis equal
+% hold on
+% 
+% 
+% 
+%  box on
+%  xlim([-76 -65])
+% ylim([35 45])
+% v=[-150 -50]
+% contour(xi,yi,depthgrid,v,'Color',[.8 .8 .8])
+% 
+% [Hist, Idx] = hist(zi2(:), 1000);
+% %cumHist = cumsum(Hist)/sum(Hist);
+% %Idx_max = find(cumHist > 0.999,1);
+% bin_max = Idx(end);
+% 
+% set(gca,'clim',[0 bin_max])
+% 
+% 
+% states = shaperead('usastatehi', 'UseGeoCoords', true);
+% geoshow(states, 'DefaultFaceColor', 'black', ...
+%                 'DefaultEdgeColor', 'black');
+% hold on
+% % CL=shaperead('C:\Users\kristin.kleisner.NMFS\Desktop\mappingCode\RawData\Province.shp')
+% CL=shaperead('C:\Users\joseph.caracappa\Documents\Website Visualizations\Shapefiles\PROVINCE\Province.shp')
+% mapshow(CL,'FaceColor', 'black', ...
+%                 'DefaultEdgeColor', 'black');
+%             
+% geoshow(states, 'FaceColor', 'black');
+% set(gca,'xtick',[-74 -72 -70 -68 -66])
+% set(gca,'xTickLabel',{'74 W';'72 W';'70 W';'68 W';'66 W'},'FontSize',10);
+% set(gca,'Ytick',[ 36 38 40 42 44])
+% set(gca,'YTickLabel',{'36 N';'38 N';'40 N';'42 N';'44 N'},'FontSize',10);
+% 
+% % set uniform color scheme for all the years based on first year range of
+% % values
+% if sum(CATCH(:)) > 0
+% if ~exist('cmax', 'var')
+% cmax = max(zi2(:));
+% end
+% caxis([0, cmax])
+% colorbar;
+% hcb=colorbar;
+% colorTitleHandle = get(hcb,'Title');
+% titleString = 'Numbers/Tow';
+% set(colorTitleHandle ,'String',titleString);
+% end
