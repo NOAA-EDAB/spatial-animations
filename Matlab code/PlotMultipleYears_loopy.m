@@ -6,7 +6,7 @@ load ('C:\Users\joseph.caracappa\Documents\GitHub\spatial-animations\NEBathymetr
 lonb=NEBathymetry(:,1); latb=NEBathymetry(:,2);depth=NEBathymetry(:,3);
 
 [CR, STA, STR, VES, YEAR, SEASON, TOW, SHG, GEAR, ESTYR, MON, DAT, TIME, DISTB, DISTW, AVGDPT, AREA, BTEMP,  LAT, LONG]=...
-    textread('C:\Users\joseph.caracappa\Documents\Website Visualizations\stationview_x.csv','%f %f %f %s %f %s %f %f %f %f %f %f %f %f %f %f %f %f %f %f','delimiter',',','headerlines',1);
+    textread('C:\Users\joseph.caracappa\Documents\GitHub\spatial-animations\stationview_x.csv','%f %f %f %s %f %s %f %f %f %f %f %f %f %f %f %f %f %f %f %f','delimiter',',','headerlines',1);
 %     textread('C:\Users\kristin.kleisner.NMFS\Desktop\mappingCode\Raw_input_SP_FA\Fall2\stationview_x.csv','%f %f %f %s %f %s %f %f %f %f %f %f %f %f %f %f %f %f %f %f','delimiter',',','headerlines',1);
       
 Hour=floor(TIME/100); 
