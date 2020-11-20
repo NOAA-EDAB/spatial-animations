@@ -1,18 +1,31 @@
 #Script Generates spatial animation data for given species/year and outputs Nc file
 
 library(ncdf4)
+library(dplyr)
 
 # Read in Data
 bathymetry = read.table(here::here('NEBathymetry.txt'))
 station = read.csv(here::here('stationview_x.csv'),as.is = T)
 
-spp.data = read.csv(here::here('SurvDatSpec_Fall.csv'),header=F)
+# spp.data = read.csv(here::here('SurvDatSpec_Fall.csv'),header=F)
+spp.data = readRDS(here::here('data-raw','survey_spp_index.Rds'))
+spp.data$SVSPP = as.character(spp.data$SVSPP)
 colnames(spp.data) = c('SVSPP','COMNAME','Species')
+SpeciesNum = nrow(spp.data)
 
 # Load sourced functions
 source(here::here('R Code','gIDW.R'))
 source(here::here('R Code','spp_year_interpolation.R'))
 
+# Load in survdat data
+survdat = readRDS(here::here('data-raw','survdat.Rds'))$survdat
+
+#Filter survdat, join with spp index, select only fall
+survdat = survdat %>%
+  select(CRUISE6,STRATUM,TOW,STATION,SEASON,SVSPP,CATCHSEX,BIOMASS,ABUNDANCE,YEAR) %>%
+  filter(SEASON == 'FALL') %>%
+  left_join(spp.data) %>%
+  filter(!is.na(COMNAME))
 
 min.lat = 35
 max.lat = 45
@@ -21,10 +34,10 @@ max.lon = -65
 interval = 0.02
 
 #Time range
-year.start = 1980
-year.stop = 1980
-yearnames = year.start:year.stop
-nyears = length(yearnames)
+# year.start = 1980
+# year.stop = 1980
+# yearnames = year.start:year.stop
+# nyears = length(yearnames)
 
 #Define interpolation grid
 xi = seq(min.lon,max.lon,interval)
@@ -33,20 +46,26 @@ yi = seq(min.lat,max.lat,interval)
 n.spp = length(spp.data$SVSPP)
 out.dir = here::here('Output_Data','/')
 
-# for(ss in 1:SpeciesNum){
-for(ss in 1:1){
-  
-  
+for(ss in 1:SpeciesNum){
+
   filename.out = paste0(out.dir,spp.data$Species[ss],'-Fall_R.nc')
+  
+  # catchview = read.csv(paste0(here::here('Catchview Data'),'/catchview_',spp.data$SVSPP[ss],'.csv'))
+  catchview = survdat %>%
+    filter(SVSPP == spp.data$SVSPP[ss])
+  
+  yearnames = min(catchview$YEAR):max(catchview$YEAR)
+  nyear= length(yearnames)
   
   #Define data arrays
   lat.array = array(0,dim = c(length(yi),length(xi),nyears))
   lon.array = array(0,dim = c(length(yi),length(xi),nyears))
   abundance = array(0,dim = c(length(yi),length(xi),nyears))
   
-  catchview = read.csv(paste0(here::here('Catchview Data'),'/catchview_',spp.data$SVSPP[ss],'.csv'))
-  
+
   for(y in 1:nyears){
+    catchview.yr = catchview %>%
+      filter(YEAR == yearnames[y])
     
     yr = yearnames[y]
     grd =spp.year.density(
